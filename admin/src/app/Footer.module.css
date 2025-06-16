@@ -1,0 +1,34 @@
+.footer {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  padding: 1em 1.2em;
+  background-color: #033043;
+  color: #e9e3d5;
+  height: auto;
+  width: 100%;}
+
+
+.footer .container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.footer h5 {
+  margin-bottom: 1rem;
+}
+
+.footer p {
+  margin-bottom: 0;
+}
+
+.footer svg {
+  margin-right: 0.5rem;
+}
+
+.footer .d-flex {
+  display: flex;
+  align-items: center;
+}

@@ -1,0 +1,62 @@
+
+
+.section {
+    padding: 20px;
+    background-color: #e9e3d5;
+  }
+  
+  .titulo {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #033043;
+  }
+  
+  .texto {
+    text-align: center;
+  }
+
+  .texto2 {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #033043;
+  }
+
+  .servico {
+    width: calc(100% / 2 - 20px);
+    margin-bottom: 20px;
+  }
+  
+  .servico img {
+    object-fit: cover;
+    height: 100%;
+  }
+  
+  .card-img-overlay {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+  }
+  
+  .overlay {
+    opacity: 1;
+    transition: opacity 0.6s ease;
+  }
+  
+  .servico:hover .overlay {
+    opacity: 0.5;
+  }
+  
+  .servico:hover {
+    transform: scale(1.05);
+  }
+  
+  @media (min-width: 768px) {
+    .servico {
+      width: calc(100% / 3 - 20px);
+    }
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
