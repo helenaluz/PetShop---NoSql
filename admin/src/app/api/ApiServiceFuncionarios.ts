@@ -144,6 +144,24 @@ export async function buscarTodosFuncionarios() {
   }
 }
 
+export async function buscarTodosVets() {
+  try {
+    const funcionariosRef = collection(db, "funcionarios");
+    const q = query(funcionariosRef, where("profissao", "==", "Veterinário"));
+    const querySnapshot = await getDocs(q);
+
+    const funcionarios = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      nome: doc.data().nome,
+    }));
+
+      return funcionarios
+  } catch (error) {
+    console.error("Erro ao buscar todos funcionários:", error);
+    return [];
+  }
+}
+
 export async function buscarFuncionarioPorCargo(cargo: string) {
   try {
     const funcionariosRef = collection(db, "funcionarios");

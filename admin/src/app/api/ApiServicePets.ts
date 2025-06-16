@@ -1,3 +1,4 @@
+
 import { doc, updateDoc, deleteDoc, getDocs, addDoc, getDoc, collection, query, where  } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -175,6 +176,23 @@ export async function buscarTodospets() {
     return [];
   }
 }
+
+export async function buscarTodosPetsParaConsulta() {
+    try {
+      const petsRef = collection(db, "pets");
+      const snapshot = await getDocs(petsRef);
+  
+      const pets = snapshot.docs.map(doc => ({
+        id: doc.id,
+        nome: doc.data().nome,
+      }));
+  
+      return pets;
+    } catch (error) {
+      console.error("Erro ao buscar todos pets:", error);
+      return [];
+    }
+  }
 
 export async function buscarPetPorRaca(raca: string) {
   try {

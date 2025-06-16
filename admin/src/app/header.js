@@ -61,22 +61,40 @@ export default function header() {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  Pets
+                  Donos
                 </a>
                 <ul className="dropdown-menu">
                   <li>
-                    <a className="dropdown-item nav-link" href="#">
+                    <a className="dropdown-item nav-link" href="/dono/cadastro">
                       Cadastro
                     </a>
                   </li>
                   <li>
-                    <a className="dropdown-item nav-link" href="./funcionarios">
+                    <a className="dropdown-item nav-link" href="/dono/consultar">
                       Ver todos
                     </a>
                   </li>
+                </ul>
+              </li>
+              <li className="nav-item dropdown">
+                <a
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Pets
+                </a>
+                <ul className="dropdown-menu">
                   <li>
-                    <a className="dropdown-item nav-link" href="./cadastro">
-                      Editar/ Alterar
+                    <a className="dropdown-item nav-link" href="/pet/cadastro">
+                      Cadastro
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item nav-link" href="/pet/consultar">
+                      Ver todos
                     </a>
                   </li>
                 </ul>
@@ -93,18 +111,13 @@ export default function header() {
                 </a>
                 <ul className="dropdown-menu">
                   <li>
-                    <a className="dropdown-item nav-link" href="#">
+                    <a className="dropdown-item nav-link" href="/consulta/cadastro">
                       Cadastro
                     </a>
                   </li>
                   <li>
-                    <a className="dropdown-item nav-link" href="./funcionarios">
+                    <a className="dropdown-item nav-link" href="/consulta/consultar">
                       Ver todos
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item nav-link" href="./cadastro">
-                      Editar/ Alterar
                     </a>
                   </li>
                 </ul>

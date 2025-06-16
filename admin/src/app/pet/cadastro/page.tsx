@@ -6,104 +6,120 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
-  adicionarFuncionario,
-  buscarFuncionarioPorNome,
-  alterarFuncionarioPorId,
-  excluirFuncionarioPorId,
-} from "../../api/ApiServiceFuncionarios";
-import { buscarTodosCargos } from "../../api/ApiServiceCargos";
+  adicionarPet,
+  buscarPetPorNome,
+  alterarPetPorId,
+  excluirPetPorId,
+} from "../../api/ApiServicePets";
+import { buscarTodasRacas } from "../../api/ApiServiceRaca";
+import { buscarTodosDonosParaPet } from "admin/app/api/ApiServiceDonos";
 import styles from "./page.module.css";
-import { Funcionario, Cargo } from "./types";
+import { Pet, Raca, Dono } from "./types";
 
 export default function Cadastro() {
-  const [funcionario, setFuncionario] = useState<Funcionario | null>(null);
-  const [funcionarioAlteracao, setFuncionarioAlteracao] = useState<Funcionario | null>(null);
+  const [pet, setPet] = useState<Pet | null>(null);
+  const [petAlteracao, setPetAlteracao] = useState<Pet | null>(null);
   const [nomeBusca, setNomeBusca] = useState<string>("");
+  const [racas, setRacas] = useState<Raca[]>([]);
+  const [donos, setDonos] = useState<Dono[]>([]);
 
-  const [novoFuncionario, setNovoFuncionario] = useState({
+  const [novoPet, setNovoPet] = useState({
     nome: "",
-    endereco: "",
-    email: "",
-    profissao: "",
+    raca: "",
+    dono: "",
+    idade: 0,
+    peso: 0,
     foto: "",
   });
 
-  const [cargos, setCargos] = useState<Cargo[]>([]);
-
   useEffect(() => {
-    async function carregarCargos() {
-      const listaCargos = await buscarTodosCargos();
-      setCargos(listaCargos);
+    async function carregarRacas() {
+      const listaRacas = await buscarTodasRacas();
+      setRacas(listaRacas);
     }
-    carregarCargos();
+    carregarRacas();
   }, []);
 
-  function converterFuncionario(data: any): Funcionario {
+  useEffect(() => {
+    async function carregarDonos() {
+      const listaDonos = await buscarTodosDonosParaPet();
+      setDonos(listaDonos);
+    }
+    carregarDonos();
+  }, []);
+
+  function converterPet(data: any): Pet {
     return {
       id: data.id,
       nome: data.nome,
-      endereco: data.endereco,
-      email: data.email,
-      profissao: data.profissao,
+      raca: data.raca,
+      dono: data.dono,
+      idade: data.idade,
+      peso: data.peso,
       foto: data.foto || "",
     };
   }
 
-  const handleBuscaFuncionarioPorNome = async () => {
+  const handleBuscaPetPorNome = async () => {
     if (nomeBusca.trim() === "") {
       toast.error("Informe um nome para buscar.");
       return;
     }
 
-    const response = await buscarFuncionarioPorNome(nomeBusca);
+    const response = await buscarPetPorNome(nomeBusca);
 
     if (response.status === 200 && response.data && response.data.length > 0) {
-      const f = converterFuncionario(response.data[0]);
-      setFuncionario(f);
-      setFuncionarioAlteracao(f);
-      toast.success("Funcionário encontrado!");
+      const f = converterPet(response.data[0]);
+      setPet(f);
+      setPetAlteracao(f);
+      toast.success("Pet encontrado!");
     } else {
-      toast.error(response.mensagem || "Funcionário não encontrado.");
-      setFuncionario(null);
-      setFuncionarioAlteracao(null);
+      toast.error(response.mensagem || "Pet não encontrado.");
+      setPet(null);
+      setPetAlteracao(null);
     }
   };
 
-  const handleAlterarFuncionario = async () => {
-    if (!funcionarioAlteracao || !funcionarioAlteracao.id) {
-      toast.error("Nenhum funcionário selecionado para alterar.");
+  const handleAlterarPet = async () => {
+    if (!petAlteracao || !petAlteracao.id) {
+      toast.error("Nenhum Pet selecionado para alterar.");
       return;
     }
-    const response = await alterarFuncionarioPorId(funcionarioAlteracao.id, funcionarioAlteracao);
+    const response = await alterarPetPorId(petAlteracao.id, petAlteracao);
     if (response.status === 200) {
-      toast.success("Funcionário alterado com sucesso!");
-      setFuncionario(funcionarioAlteracao); // Atualiza a exibição
+      toast.success("Pet alterado com sucesso!");
+      setPet(petAlteracao);
     } else {
-      toast.error(response.mensagem || "Erro ao alterar funcionário.");
+      toast.error(response.mensagem || "Erro ao alterar Pet.");
     }
   };
 
-  const handleExcluirFuncionario = async () => {
-    if (!funcionario || !funcionario.id) {
-      toast.error("Nenhum funcionário selecionado para exclusão.");
+  const handleExcluirPet = async () => {
+    if (!pet || !pet.id) {
+      toast.error("Nenhum Pet selecionado para exclusão.");
       return;
     }
-    const response = await excluirFuncionarioPorId(funcionario.id);
+    const response = await excluirPetPorId(pet.id);
     if (response.status === 200) {
-      toast.success("Funcionário excluído com sucesso!");
-      setFuncionario(null);
-      setFuncionarioAlteracao(null);
+      toast.success("Pet excluído com sucesso!");
+      setPet(null);
+      setPetAlteracao(null);
       setNomeBusca("");
     } else {
-      toast.error(response.mensagem || "Erro ao excluir funcionário.");
+      toast.error(response.mensagem || "Erro ao excluir Pet.");
     }
   };
 
-  const handleChangeAlteracao = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    if (!funcionarioAlteracao) return;
-    setFuncionarioAlteracao({
-      ...funcionarioAlteracao,
-      [e.target.name]: e.target.value,
+  const handleChangeAlteracao = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    if (!petAlteracao) return;
+
+    const { name, value } = e.target;
+
+    setPetAlteracao({
+      ...petAlteracao,
+      [name]: name === "idade" || name === "peso" ? Number(value) : value,
     });
   };
 
@@ -111,64 +127,80 @@ export default function Cadastro() {
     <main className={styles.container}>
       <div className="container">
         <Row>
+          {/* Busca e edição */}
           <Col md={6} className="mb-4">
-            <h2>Buscar Funcionário por Nome</h2>
+            <h2>Buscar Pet por Nome</h2>
             <Form>
               <Form.Group className="mb-3">
-                <Form.Label>Nome do Funcionário:</Form.Label>
+                <Form.Label>Nome do Pet:</Form.Label>
                 <Form.Control
                   type="text"
                   value={nomeBusca}
                   onChange={(e) => setNomeBusca(e.target.value)}
                 />
               </Form.Group>
-              <Button variant="primary" onClick={handleBuscaFuncionarioPorNome}>
+              <Button variant="primary" onClick={handleBuscaPetPorNome}>
                 Buscar
               </Button>
             </Form>
 
-            {funcionarioAlteracao && (
+            {petAlteracao && (
               <div className="mt-4">
-                <h5>Editar Funcionário:</h5>
+                <h5>Editar Pet:</h5>
                 <Form>
                   <Form.Group className="mb-3">
                     <Form.Label>Nome:</Form.Label>
                     <Form.Control
                       type="text"
                       name="nome"
-                      value={funcionarioAlteracao.nome}
+                      value={petAlteracao.nome}
                       onChange={handleChangeAlteracao}
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>Endereço:</Form.Label>
+                    <Form.Label>Idade:</Form.Label>
                     <Form.Control
-                      type="text"
-                      name="endereco"
-                      value={funcionarioAlteracao.endereco}
+                      type="number"
+                      name="idade"
+                      value={petAlteracao.idade}
                       onChange={handleChangeAlteracao}
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>Email:</Form.Label>
+                    <Form.Label>Peso:</Form.Label>
                     <Form.Control
-                      type="email"
-                      name="email"
-                      value={funcionarioAlteracao.email}
+                      type="number"
+                      name="peso"
+                      value={petAlteracao.peso}
                       onChange={handleChangeAlteracao}
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>Profissão:</Form.Label>
+                    <Form.Label>Dono:</Form.Label>
                     <Form.Select
-                      name="profissao"
-                      value={funcionarioAlteracao.profissao}
+                      name="dono"
+                      value={petAlteracao.dono}
                       onChange={handleChangeAlteracao}
                     >
-                      <option value="">Selecione uma profissão</option>
-                      {cargos.map((cargo) => (
-                        <option key={cargo.id} value={cargo.nome}>
-                          {cargo.nome}
+                      <option value="">Selecione um dono</option>
+                      {donos.map((dono) => (
+                        <option key={dono.id} value={dono.nome}>
+                          {dono.nome}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Raça:</Form.Label>
+                    <Form.Select
+                      name="raca"
+                      value={petAlteracao.raca}
+                      onChange={handleChangeAlteracao}
+                    >
+                      <option value="">Selecione uma raça</option>
+                      {racas.map((raca) => (
+                        <option key={raca.id} value={raca.nome}>
+                          {raca.nome}
                         </option>
                       ))}
                     </Form.Select>
@@ -178,21 +210,21 @@ export default function Cadastro() {
                     <Form.Control
                       type="text"
                       name="foto"
-                      value={funcionarioAlteracao.foto}
+                      value={petAlteracao.foto}
                       onChange={handleChangeAlteracao}
                     />
                   </Form.Group>
-                  {funcionarioAlteracao.foto && (
+                  {petAlteracao.foto && (
                     <div className="mb-3">
-                      <Image src={funcionarioAlteracao.foto} alt="Foto do funcionário" fluid />
+                      <Image src={petAlteracao.foto} alt="Foto do Pet" fluid />
                     </div>
                   )}
                   <div className="d-flex justify-content-between">
-                    <Button variant="success" onClick={handleAlterarFuncionario}>
+                    <Button variant="success" onClick={handleAlterarPet}>
                       Salvar Alterações
                     </Button>
-                    <Button variant="danger" onClick={handleExcluirFuncionario}>
-                      Excluir Funcionário
+                    <Button variant="danger" onClick={handleExcluirPet}>
+                      Excluir Pet
                     </Button>
                   </div>
                 </Form>
@@ -201,18 +233,19 @@ export default function Cadastro() {
           </Col>
 
           <Col md={6} className="mb-4">
-            <h2 className="text-center mb-4">Cadastrar novo funcionário</h2>
+            <h2 className="text-center mb-4">Cadastrar novo Pet</h2>
             <Form
               onSubmit={async (e) => {
                 e.preventDefault();
-                const response = await adicionarFuncionario(novoFuncionario);
+                const response = await adicionarPet(novoPet);
                 if (response.status === 201) {
-                  toast.success("Funcionário cadastrado com sucesso!");
-                  setNovoFuncionario({
+                  toast.success("Pet cadastrado com sucesso!");
+                  setNovoPet({
                     nome: "",
-                    endereco: "",
-                    email: "",
-                    profissao: "",
+                    raca: "",
+                    dono: "",
+                    idade: 0,
+                    peso: 0,
                     foto: "",
                   });
                 } else {
@@ -224,42 +257,63 @@ export default function Cadastro() {
                 <Form.Label>Nome:</Form.Label>
                 <Form.Control
                   type="text"
-                  value={novoFuncionario.nome}
-                  onChange={(e) => setNovoFuncionario({ ...novoFuncionario, nome: e.target.value })}
+                  value={novoPet.nome}
+                  onChange={(e) => setNovoPet({ ...novoPet, nome: e.target.value })}
                   required
                 />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Endereço:</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={novoFuncionario.endereco}
-                  onChange={(e) => setNovoFuncionario({ ...novoFuncionario, endereco: e.target.value })}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Email:</Form.Label>
-                <Form.Control
-                  type="email"
-                  value={novoFuncionario.email}
-                  onChange={(e) => setNovoFuncionario({ ...novoFuncionario, email: e.target.value })}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Profissão:</Form.Label>
+                <Form.Label>Dono:</Form.Label>
                 <Form.Select
-                  value={novoFuncionario.profissao}
+                  value={novoPet.dono}
                   onChange={(e) =>
-                    setNovoFuncionario({ ...novoFuncionario, profissao: e.target.value })
+                    setNovoPet({ ...novoPet, dono: e.target.value })
                   }
                   required
                 >
-                  <option value="">Selecione uma profissão</option>
-                  {cargos.map((cargo) => (
-                    <option key={cargo.id} value={cargo.nome}>
-                      {cargo.nome}
+                  <option value="">Selecione um dono</option>
+                  {donos.map((dono) => (
+                    <option key={dono.id} value={dono.nome}>
+                      {dono.nome}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Idade:</Form.Label>
+                <Form.Control
+                  type="number"
+                  value={novoPet.idade}
+                  onChange={(e) =>
+                    setNovoPet({ ...novoPet, idade: Number(e.target.value) })
+                  }
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Peso:</Form.Label>
+                <Form.Control
+                  type="number"
+                  value={novoPet.peso}
+                  onChange={(e) =>
+                    setNovoPet({ ...novoPet, peso: Number(e.target.value) })
+                  }
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Raça:</Form.Label>
+                <Form.Select
+                  value={novoPet.raca}
+                  onChange={(e) =>
+                    setNovoPet({ ...novoPet, raca: e.target.value })
+                  }
+                  required
+                >
+                  <option value="">Selecione uma raça</option>
+                  {racas.map((raca) => (
+                    <option key={raca.id} value={raca.nome}>
+                      {raca.nome}
                     </option>
                   ))}
                 </Form.Select>
@@ -268,13 +322,13 @@ export default function Cadastro() {
                 <Form.Label>Foto (URL):</Form.Label>
                 <Form.Control
                   type="text"
-                  value={novoFuncionario.foto}
-                  onChange={(e) => setNovoFuncionario({ ...novoFuncionario, foto: e.target.value })}
+                  value={novoPet.foto}
+                  onChange={(e) => setNovoPet({ ...novoPet, foto: e.target.value })}
                 />
               </Form.Group>
               <div className="text-center">
                 <Button variant="success" type="submit">
-                  Cadastrar Funcionário
+                  Cadastrar Pet
                 </Button>
               </div>
             </Form>
