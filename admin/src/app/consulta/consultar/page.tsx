@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import styles from "./page.module.css";
-import { buscarTodospets, buscarPetPorConsulta } from "../../api/ApiServicePets";
+import { buscarPetPorRaca, buscarTodospets, buscarTodosPetsParaConsulta } from "../../api/ApiServicePets";
 
 export default function Consultar() {
   const [pets, setPets] = useState<any[]>([]);
@@ -22,7 +22,7 @@ export default function Consultar() {
         setLoading(false);
 
         // Extrair raças únicas para o filtro
-        const racasUnicas = Array.from(new Set(listaPets.map((pet) => pet.raca).filter(Boolean)));
+        const racasUnicas = Array.from(new Set(listaPets.map((pet) => pet.id).filter(Boolean)));
         setRacas(racasUnicas);
       } catch (error) {
         toast.error("Erro ao carregar pets.");
@@ -40,7 +40,7 @@ export default function Consultar() {
     }
 
     try {
-      const petsFiltrados = await buscarPetPorConsulta(filtroRaca);
+      const petsFiltrados = await buscarPetPorRaca(filtroRaca);
       if (petsFiltrados.length > 0) {
         setPets(petsFiltrados);
         toast.success("Pets filtrados por raça!");

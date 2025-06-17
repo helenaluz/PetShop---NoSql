@@ -61,3 +61,7 @@ export default function Consultar() {
     </main>
   );
 }
+
+function setCargos(listaCargos: { id: string; nome: any; }[]) {
+  throw new Error("Function not implemented.");
+}

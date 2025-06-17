@@ -5,3 +5,11 @@ export interface Dono {
   email: string;
   telefone:string;
 }
+
+export interface Cargo {
+  id: string; 
+  nome: string;
+  descricao: string;  
+  salario: number;
+  cargaHoraria: number;  
+}

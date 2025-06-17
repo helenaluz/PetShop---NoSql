@@ -83,7 +83,7 @@ export default function CadastroConsulta() {
   };
 
   const handleChangeAlvo = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     if (!consultaAlvo) return;
 
@@ -172,7 +172,7 @@ export default function CadastroConsulta() {
                     <Form.Control
                       type="date"
                       name="data"
-                      value={consultaAlvo.data.split("T")[0]} // Caso venha com hora
+                      value={new Date(consultaAlvo.data).toISOString().split("T")[0]}
                       onChange={handleChangeAlvo}
                     />
                   </Form.Group>
