@@ -111,7 +111,7 @@ export default function Cadastro() {
   };
 
   const handleChangeAlteracao = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     if (!petAlteracao) return;
 

@@ -89,11 +89,12 @@ export default function Cadastro() {
     }
   };
 
-  const handleChangeAlteracao = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChangeAlteracao = (e: React.ChangeEvent<HTMLElement>) => {
     if (!DonoAlteracao) return;
+    const target = e.target as HTMLInputElement;
     setDonoAlteracao({
       ...DonoAlteracao,
-      [e.target.name]: e.target.value,
+      [target.name]: target.value,
     });
   };
 

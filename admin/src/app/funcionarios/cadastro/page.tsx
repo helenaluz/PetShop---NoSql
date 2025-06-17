@@ -99,7 +99,7 @@ export default function Cadastro() {
     }
   };
 
-  const handleChangeAlteracao = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChangeAlteracao = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     if (!funcionarioAlteracao) return;
     setFuncionarioAlteracao({
       ...funcionarioAlteracao,
