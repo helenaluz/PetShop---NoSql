@@ -1,92 +1,89 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
-import { Button, Form, Image } from "react-bootstrap";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Button, Form } from "react-bootstrap";
+import Image from "next/image";
 import styles from "./page.module.css";
-import { buscarPetPorRaca, buscarTodospets, buscarTodosPetsParaConsulta } from "../../api/ApiServicePets";
+import { buscarConsultasPorFiltro } from "../../api/ApiServiceConsulta";
+import { buscarTodospets } from "admin/app/api/ApiServicePets";
+import { buscarTodosVets } from "admin/app/api/ApiServiceFuncionarios";
 
 export default function Consultar() {
-  const [pets, setPets] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filtroRaca, setFiltroRaca] = useState<string>("");
-  const [racas, setRacas] = useState<string[]>([]);
+  const [veterinarios, setVeterinarios] = useState<{ id: string; nome: string }[]>([]);
+  const [pets, setPets] = useState<{ id: string; nome: string }[]>([]);
 
-  // Carregar todos os pets inicialmente
+  const [veterinario, setVeterinario] = useState("");
+  const [pet, setPet] = useState("");
+  const [data, setData] = useState("");
+  const [consultas, setConsultas] = useState<any[]>([]);
+
   useEffect(() => {
-    async function fetchPets() {
+    async function carregarDados() {
       try {
-        const listaPets = await buscarTodospets();
-        setPets(listaPets);
-        setLoading(false);
+        const vets = await buscarTodosVets();
+        setVeterinarios(vets);
 
-        // Extrair raças únicas para o filtro
-        const racasUnicas = Array.from(new Set(listaPets.map((pet) => pet.id).filter(Boolean)));
-        setRacas(racasUnicas);
+        const petsList = await buscarTodospets();
+        setPets(petsList);
       } catch (error) {
-        toast.error("Erro ao carregar pets.");
-        setLoading(false);
+        console.error("Erro ao carregar veterinários ou pets", error);
       }
     }
-    fetchPets();
+    carregarDados();
   }, []);
 
-  // Filtrar pets por raça
-  const handleFiltroConsulta = async () => {
-    if (filtroRaca.trim() === "") {
-      toast.error("Selecione uma raça para buscar.");
-      return;
-    }
+  const handleBuscar = async () => {
+    const filtro: any = {};
+    if (veterinario) filtro.veterinario = veterinario;
+    if (pet) filtro.pet = pet;
+    if (data) filtro.data = new Date(data);
 
-    try {
-      const petsFiltrados = await buscarPetPorRaca(filtroRaca);
-      if (petsFiltrados.length > 0) {
-        setPets(petsFiltrados);
-        toast.success("Pets filtrados por raça!");
-      } else {
-        toast.info("Nenhum pet encontrado para essa raça.");
-        setPets([]);
-      }
-    } catch (error) {
-      toast.error("Erro ao buscar pets por raça.");
-    }
+    const resultados = await buscarConsultasPorFiltro(filtro);
+    setConsultas(resultados);
   };
 
-  // Cancelar filtro e mostrar todos os pets
-  const handleCancelarFiltro = async () => {
-    try {
-      const todosPets = await buscarTodospets();
-      setPets(todosPets);
-      setFiltroRaca("");
-      toast.info("Filtro cancelado. Mostrando todos os pets.");
-    } catch (error) {
-      toast.error("Erro ao buscar todos os pets.");
-    }
+  const handleCancelarFiltro = () => {
+    setVeterinario("");
+    setPet("");
+    setData("");
+    setConsultas([]);
   };
-
-  if (loading) {
-    return <p>Carregando pets...</p>;
-  }
 
   return (
     <main className={styles.container}>
-      <h1>Lista de Pets</h1>
+      <h1>Lista de Consultas</h1>
 
-      <Form className="mb-3">
-        <Form.Group className="mb-3">
-          <Form.Label>Filtrar por Raça:</Form.Label>
-          <Form.Select value={filtroRaca} onChange={(e) => setFiltroRaca(e.target.value)}>
-            <option value="">Selecione uma raça</option>
-            {racas.map((raca) => (
-              <option key={raca} value={raca}>
-                {raca}
+      <Form className="mb-4">
+        <Form.Group className="mb-3" controlId="selectVeterinario">
+          <Form.Label>Veterinário</Form.Label>
+          <Form.Select value={veterinario} onChange={(e) => setVeterinario(e.target.value)}>
+            <option value="">Selecione um veterinário</option>
+            {veterinarios.map((vet) => (
+              <option key={vet.id} value={vet.nome}>
+                {vet.nome}
               </option>
             ))}
           </Form.Select>
         </Form.Group>
 
-        <Button variant="primary" onClick={handleFiltroConsulta} className="me-3">
+        <Form.Group className="mb-3" controlId="selectPet">
+          <Form.Label>Pet</Form.Label>
+          <Form.Select value={pet} onChange={(e) => setPet(e.target.value)}>
+            <option value="">Selecione um pet</option>
+            {pets.map((p) => (
+              <option key={p.id} value={p.nome}>
+                {p.nome}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+
+        <Form.Group className="mb-3" controlId="inputData">
+          <Form.Label>Data</Form.Label>
+          <Form.Control type="date" value={data} onChange={(e) => setData(e.target.value)} />
+        </Form.Group>
+
+        <Button variant="primary" onClick={handleBuscar} className="me-3">
           Buscar
         </Button>
         <Button variant="secondary" onClick={handleCancelarFiltro}>
@@ -95,27 +92,23 @@ export default function Consultar() {
       </Form>
 
       <div className={styles.grid}>
-        {pets.map((pet) => (
-          <div key={pet.id} className={styles.card}>
-            <div className={styles.imageContainer}>
-              <Image
-                src={
-                  pet.foto
-                    ? pet.foto
-                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGcv25gPu69uUIwPHWhqsQauv4E9FVhk7bCw&s"
-                }
-                alt={pet.nome}
-                className="img-fluid"
-              />
-            </div>
-            <h2 className={styles.nome}>{pet.nome}</h2>
-            <p className={styles.text}>Raça: {pet.raca || "Indefinida"}</p>
-            <p className={styles.text}>Dono: {pet.dono || "Indefinido"}</p>
+        {consultas.length === 0 && <p>Nenhuma consulta encontrada.</p>}
+
+        {consultas.map((consulta) => (
+          <div key={consulta.id} className={styles.card}>
+            <h2 className={styles.nome}>{consulta.veterinario}</h2>
+            <p className={styles.text}>Pet: {consulta.pet || "Indefinido"}</p>
+            <p className={styles.text}>
+              Data:{" "}
+              {consulta.data?.toDate
+                ? consulta.data.toDate().toLocaleString()
+                : consulta.data
+                ? new Date(consulta.data).toLocaleString()
+                : "Indefinida"}
+            </p>
           </div>
         ))}
       </div>
-
-      <ToastContainer theme="colored" />
     </main>
   );
 }

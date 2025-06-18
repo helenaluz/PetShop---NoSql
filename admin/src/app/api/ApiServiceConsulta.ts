@@ -1,4 +1,4 @@
-import { doc, updateDoc, deleteDoc, getDocs, addDoc, getDoc, collection, query, where  } from "firebase/firestore";
+import {Timestamp, doc, updateDoc, deleteDoc, getDocs, addDoc, getDoc, collection, query, where  } from "firebase/firestore";
 import { db } from "./firebase";
 
 
@@ -36,47 +36,53 @@ export async function buscarConsultaPorId(id: string): Promise<ResponseApi> {
   }
 
   export async function buscarConsultaPorVetEData(
-    veterinario: string,
-    data: string // data no formato "YYYY-MM-DD"
-  ): Promise<ResponseApi> {
-    try {
-      const ConsultasRef = collection(db, "Consultas");
-  
-      // Filtra consultas onde veterinario == veterinario e data == data
-      const q = query(
-        ConsultasRef,
-        where("veterinario", "==", veterinario),
-        where("data", "==", data)
-      );
-  
-      const querySnapshot = await getDocs(q);
-  
-      if (!querySnapshot.empty) {
-        const Consultas: any[] = [];
-        querySnapshot.forEach((doc) => {
-          Consultas.push({ id: doc.id, ...doc.data() });
-        });
-  
-        return {
-          status: 200,
-          mensagem: "Consulta(s) encontrado(s) com sucesso!",
-          data: Consultas,
-        };
-      } else {
-        return {
-          status: 404,
-          mensagem: "Nenhuma consulta encontrada para esse veterinário e data.",
-        };
-      }
-    } catch (error) {
-      console.error("Erro ao buscar consulta:", error);
+  veterinario: string,
+  data: Date
+): Promise<ResponseApi> {
+  try {
+    const ConsultasRef = collection(db, "Consultas");
+
+    const startOfDay = new Date(data);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(data);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const q = query(
+      ConsultasRef,
+      where("veterinario", "==", veterinario),
+      where("data", ">=", startOfDay),
+      where("data", "<=", endOfDay)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const Consultas: any[] = [];
+      querySnapshot.forEach((doc) => {
+        Consultas.push({ id: doc.id, ...doc.data() });
+      });
+
       return {
-        status: 500,
-        mensagem: "Erro ao buscar consulta",
-        data: error,
+        status: 200,
+        mensagem: "Consulta(s) encontrada(s) com sucesso!",
+        data: Consultas,
+      };
+    } else {
+      return {
+        status: 404,
+        mensagem: "Nenhuma consulta encontrada para esse veterinário e data.",
       };
     }
+  } catch (error) {
+    console.error("Erro ao buscar consulta:", error);
+    return {
+      status: 500,
+      mensagem: "Erro ao buscar consulta",
+      data: error,
+    };
   }
+}
 
 export async function excluirConsultaPorId(id: string): Promise<ResponseApi> {
   try {
@@ -96,8 +102,65 @@ export async function excluirConsultaPorId(id: string): Promise<ResponseApi> {
 }
 
 
+interface ConsultaFiltro {
+  veterinario?: string;
+  pet?: string;
+  data?: any; // Timestamp ou Date
+}
+
+export async function buscarConsultasPorFiltro(filtro: ConsultaFiltro) {
+  const consultasRef = collection(db, "Consultas");
+
+  let constraints = [];
+
+  if (filtro.veterinario) {
+    constraints.push(where("veterinario", "==", filtro.veterinario));
+  }
+  if (filtro.pet) {
+    constraints.push(where("pet", "==", filtro.pet));
+  }
+  if (filtro.data) {
+    const inicioDia = new Date(filtro.data);
+    inicioDia.setHours(0, 0, 0, 0);
+
+    const fimDia = new Date(inicioDia);
+    fimDia.setDate(fimDia.getDate() + 1);
+
+    constraints.push(where("data", ">=", inicioDia));
+    constraints.push(where("data", "<", fimDia));
+  }
+
+  const q = query(consultasRef, ...constraints);
+  const snapshot = await getDocs(q);
+
+  const resultados = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  return resultados;
+}
+
+
 export async function alterarConsultaPorId(id: string, body: any): Promise<ResponseApi> {
   try {
+    const consultasRef = collection(db, "Consultas");
+    const q = query(
+      consultasRef,
+      where("veterinario", "==", body.veterinario),
+      where("data", "==", body.data) 
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      return {
+        status: 400,
+        mensagem: "Já existe uma consulta agendada para esse veterinário nessa data.",
+        data: null
+      };
+    }
+
     const docRef = doc(db, "Consultas", id);
     await updateDoc(docRef, body);
 
@@ -117,6 +180,23 @@ export async function alterarConsultaPorId(id: string, body: any): Promise<Respo
 
 export async function adicionarConsulta(body: any): Promise<ResponseApi> {
   try {
+    const consultasRef = collection(db, "Consultas");
+    const q = query(
+      consultasRef,
+      where("veterinario", "==", body.veterinario),
+      where("data", "==", body.data) 
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      return {
+        status: 400,
+        mensagem: "Já existe uma consulta agendada para esse veterinário nessa data.",
+        data: null
+      };
+    }
+
     const docRef = await addDoc(collection(db, "Consultas"), body);
 
     return {

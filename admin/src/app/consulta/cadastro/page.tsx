@@ -1,5 +1,7 @@
 "use client";
 
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { useState, useEffect } from "react";
 import { Button, Form, Row, Col } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
@@ -16,17 +18,25 @@ import { buscarTodosPetsParaConsulta } from "../../api/ApiServicePets";
 import styles from "./page.module.css";
 import { Consulta, Vet, Pet } from "./types";
 
+function formatDateToInput(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+}
+
+function isValidDate(date: any): date is Date {
+  return date instanceof Date && !isNaN(date.getTime());
+}
+
 export default function CadastroConsulta() {
   const [Vets, setVets] = useState<Vet[]>([]);
   const [Pets, setPets] = useState<Pet[]>([]);
   const [filtroVet, setFiltroVet] = useState<string>("");
-  const [filtroData, setFiltroData] = useState<string>("");
+  const [filtroData, setFiltroData] = useState<Date | null>(new Date());
 
   const [consultaAlvo, setConsultaAlvo] = useState<Consulta | null>(null);
   const [novaConsulta, setNovaConsulta] = useState({
     veterinario: "",
     pet: "",
-    data: "",
+    data: new Date(),
   });
 
   useEffect(() => {
@@ -39,21 +49,42 @@ export default function CadastroConsulta() {
     carregarDados();
   }, []);
 
+  const handleDateChange = (date: Date | null) => {
+    if (!date || !isValidDate(date)) return;
+
+    const dataFormatada = formatDateToInput(date);
+
+    if (consultaAlvo) {
+      setConsultaAlvo({
+        ...consultaAlvo,
+        data: dataFormatada,
+      });
+    }
+  };
+
   const handleBuscaConsulta = async () => {
     if (!filtroVet || !filtroData) {
       toast.error("Preencha Veterinário e Data para buscar.");
       return;
     }
 
+    console.log(filtroData);
     const response = await buscarConsultaPorVetEData(filtroVet, filtroData);
+
     if (response.status === 200 && response.data) {
-      setConsultaAlvo(response.data);
+      const consulta = response.data[0];
+      consulta.data = consulta.data.toDate();
+      setConsultaAlvo(consulta);
       toast.success("Consulta encontrada!");
     } else {
       toast.error(response.mensagem || "Consulta não encontrada.");
       setConsultaAlvo(null);
     }
   };
+
+  useEffect(() => {
+    console.log("consultaAlvo atualizado:", consultaAlvo);
+  }, [consultaAlvo]);
 
   const handleAlterarConsulta = async () => {
     if (!consultaAlvo || !consultaAlvo.id) {
@@ -119,10 +150,19 @@ export default function CadastroConsulta() {
 
               <Form.Group className="mb-3">
                 <Form.Label>Data:</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={filtroData}
-                  onChange={(e) => setFiltroData(e.target.value)}
+                <DatePicker
+                  selected={isValidDate(filtroData) ? filtroData : null}
+                  onChange={(date: Date | null) => {
+                    if (date && isValidDate(date)) {
+                      const dataFormatada = formatDateToInput(date);
+                      setFiltroData(dataFormatada);
+                    } else {
+                      setFiltroData(null);
+                    }
+                  }}
+                  dateFormat="yyyy-MM-dd"
+                  className="form-control"
+                  placeholderText="Selecione uma data"
                 />
               </Form.Group>
 
@@ -169,11 +209,15 @@ export default function CadastroConsulta() {
 
                   <Form.Group className="mb-3">
                     <Form.Label>Data:</Form.Label>
-                    <Form.Control
-                      type="date"
-                      name="data"
-                      value={new Date(consultaAlvo.data).toISOString().split("T")[0]}
-                      onChange={handleChangeAlvo}
+                    <DatePicker
+                      selected={
+                        consultaAlvo.data && isValidDate(consultaAlvo.data)
+                          ? consultaAlvo.data
+                          : null
+                      }
+                      onChange={handleDateChange}
+                      dateFormat="yyyy-MM-dd"
+                      className="form-control"
                     />
                   </Form.Group>
 
@@ -190,7 +234,6 @@ export default function CadastroConsulta() {
             )}
           </Col>
 
-          {/* Cadastro Nova Consulta */}
           <Col md={6} className="mb-4">
             <h2 className="text-center mb-4">Cadastrar Nova Consulta</h2>
             <Form
@@ -198,11 +241,11 @@ export default function CadastroConsulta() {
                 e.preventDefault();
                 const response = await adicionarConsulta({
                   ...novaConsulta,
-                  data: new Date(novaConsulta.data),
+                  data: novaConsulta.data,
                 });
                 if (response.status === 201) {
                   toast.success("Consulta cadastrada com sucesso!");
-                  setNovaConsulta({ veterinario: "", pet: "", data: "" });
+                  setNovaConsulta({ veterinario: "", pet: "", data: new Date() });
                 } else {
                   toast.error(response.mensagem || "Erro ao cadastrar.");
                 }
@@ -244,17 +287,21 @@ export default function CadastroConsulta() {
                 </Form.Select>
               </Form.Group>
 
-              <Form.Group className="mb-3">
-                <Form.Label>Data:</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={novaConsulta.data}
-                  onChange={(e) =>
-                    setNovaConsulta({ ...novaConsulta, data: e.target.value })
+              <DatePicker
+                selected={isValidDate(novaConsulta.data) ? novaConsulta.data : null}
+                onChange={(date: Date | null) => {
+                  if (date && isValidDate(date)) {
+                    const dataFormatada = formatDateToInput(date);
+                    setNovaConsulta({ ...novaConsulta, data: dataFormatada });
+                  } else {
+                    setNovaConsulta({ ...novaConsulta, data: new Date() });
                   }
-                  required
-                />
-              </Form.Group>
+                }}
+                dateFormat="yyyy-MM-dd"
+                className="form-control"
+                placeholderText="Selecione uma data"
+                required
+              />
 
               <div className="text-center">
                 <Button variant="success" type="submit">

@@ -167,7 +167,7 @@ export async function buscarTodospets() {
 
     const pets = snapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      nome: doc.data().nome,
     }));
 
     return pets;
