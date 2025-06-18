@@ -31,7 +31,7 @@ export default function Consultar() {
   };
 
   if (loading) {
-    return <p>Carregando Donos...</p>;
+    return <p>Carregando Produtos...</p>;
   }
 
   return (
