@@ -131,22 +131,17 @@ export default function header() {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  Produtos
+                 Produtos
                 </a>
                 <ul className="dropdown-menu">
                   <li>
-                    <a className="dropdown-item nav-link" href="#">
+                    <a className="dropdown-item nav-link" href="/produto/cadastro">
                       Cadastro
                     </a>
                   </li>
                   <li>
-                    <a className="dropdown-item nav-link" href="./funcionarios">
+                    <a className="dropdown-item nav-link" href="/produto/consultar">
                       Ver todos
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item nav-link" href="./cadastro">
-                      Editar/ Alterar
                     </a>
                   </li>
                 </ul>
