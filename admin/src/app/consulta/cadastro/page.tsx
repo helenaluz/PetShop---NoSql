@@ -160,7 +160,7 @@ export default function CadastroConsulta() {
                       setFiltroData(null);
                     }
                   }}
-                  dateFormat="yyyy-MM-dd"
+                  dateFormat="dd/MM/yyyy"
                   className="form-control"
                   placeholderText="Selecione uma data"
                 />
@@ -216,7 +216,7 @@ export default function CadastroConsulta() {
                           : null
                       }
                       onChange={handleDateChange}
-                      dateFormat="yyyy-MM-dd"
+                      dateFormat="dd/MM/yyyy"
                       className="form-control"
                     />
                   </Form.Group>
@@ -297,7 +297,7 @@ export default function CadastroConsulta() {
                     setNovaConsulta({ ...novaConsulta, data: new Date() });
                   }
                 }}
-                dateFormat="yyyy-MM-dd"
+                dateFormat="dd/MM/yyyy"
                 className="form-control"
                 placeholderText="Selecione uma data"
                 required

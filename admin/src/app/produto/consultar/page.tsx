@@ -42,7 +42,7 @@ export default function Consultar() {
         {data.map((item) => (
           <div key={item.id} className={styles.card}>
             <h2 className={styles.nome}>{item.nome}</h2>
-            <h2 className={styles.text}>Descrição:{item.descricao}</h2>
+            <p className={styles.text}>Descrição:{item.descricao}</p>
             <p className={styles.text}>Preço: R$ {item.preco}</p>
             <p className={styles.text}>Quantidade: {item.quantidade}</p>
           </div>
