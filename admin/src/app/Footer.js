@@ -62,9 +62,9 @@ export default function Footer() {
           <div>
             <p>
               Trabalho desenvolvido para a matéria programação web <br />
-              do professor Marcos R. Cardoso da FURB <br />
+              do professor Alexander Roberto Valdameri da FURB <br />
               Desenvolvido por Helena Luz, Maria Eduarda Nascimento <br />
-              e Luana Nietsch. Em junho de 2025.
+              e Luana Nitsche. Em junho de 2025.
             </p>
           </div>
         </div>
