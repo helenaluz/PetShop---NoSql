@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/react-datepicker": "^6.2.0",
     "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
     "date-fns": "^4.1.0",
