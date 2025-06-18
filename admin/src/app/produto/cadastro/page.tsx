@@ -11,7 +11,7 @@ import {
   excluirProdutoPorId,
   alterarProdutoPorId,
   buscarTodosProdutos, 
-  excluirProdutoPorNome  
+  buscarProdutoPorNomeEDescricao  
 } from "../../api/ApiServiceProdutos";
 import styles from "./page.module.css";
 import { Produto} from "./types";
@@ -27,6 +27,7 @@ export default function Cadastro() {
   const [produto, setProduto] = useState<Produto | null>(null);
   const [produtoAlteracao, setProdutoAlteracao] = useState<Produto | null>(null);
   const [nomeBusca, setNomeBusca] = useState<string>("");
+  const [DescBusca, seDescBusca] = useState<string>("");
 
   const [novoProduto, setNovoProduto] = useState({
     nome: "",
@@ -46,12 +47,17 @@ function converterProduto(data: any): Produto {
   }
 
   const handleBuscaProdutoPorNome = async () => {
-    if (nomeBusca.trim() === "") {
+    if (nomeBusca.trim() === "")  {
       toast.error("Informe um nome para buscar.");
       return;
     }
 
-    const response = await buscarProdutoPorNome(nomeBusca);
+    if (DescBusca.trim() === "")  {
+      toast.error("Informe uma descrição para buscar.");
+      return;
+    }
+
+    const response = await buscarProdutoPorNomeEDescricao(nomeBusca, DescBusca);
 
     if (response.status === 200 && response.data && response.data.length > 0) {
       const f = converterProduto(response.data[0]);
@@ -111,7 +117,6 @@ function converterProduto(data: any): Produto {
     <main className={styles.container}>
       <div className="container">
         <Row>
-          {/* Busca e edi��o */}
           <Col md={6} className="mb-4">
             <h2>Buscar Produto por Nome</h2>
             <Form>
@@ -121,6 +126,14 @@ function converterProduto(data: any): Produto {
                   type="text"
                   value={nomeBusca}
                   onChange={(e) => setNomeBusca(e.target.value)}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Descrição do Produto:</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={DescBusca}
+                  onChange={(e) => seDescBusca(e.target.value)}
                 />
               </Form.Group>
               <Button variant="primary" onClick={handleBuscaProdutoPorNome}>

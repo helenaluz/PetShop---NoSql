@@ -35,40 +35,48 @@ export async function buscarProdutoPorId(id: string): Promise<ResponseApi> {
     }
   }
 
-  export async function buscarProdutoPorNome(nome: string) {
-    try {
-      const nomeNormalizado = nome.toLowerCase();
-      
-      const produtosRef = collection(db, "produtos");
-      const q = query(produtosRef);
-      const querySnapshot = await getDocs(q);
-    
-      const produtos = querySnapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          descricao: doc.data().descricao, 
-          nome : doc.data().nome,
-          preco: doc.data().preco,
-          quantidade: doc.data().quantidade,
-        }))
-        .filter(produto => {
-          const produtoNome = produto.nome.toLowerCase();
-          
-          return produtoNome.includes(nomeNormalizado) || 
-                 removerAcentos(produtoNome).includes(removerAcentos(nomeNormalizado));
-        });
-      
-      return {
-        status: produtos.length > 0 ? 200 : 404,
-        data: produtos,
-        mensagem: produtos.length > 0 ? "Produtos encontrados" : "Nenhum produto encontrado"
-      };
-    } catch (error) {
-      console.error("Erro ao buscar produto por nome:", error);
-      return { status: 500, mensagem: "Erro ao buscar produto" };
-    }
+  export async function buscarProdutoPorNomeEDescricao(nome: string, desc: string) {
+  try {
+    const nomeNormalizado = nome.toLowerCase();
+    const descNormalizado = desc.toLowerCase();
+
+    const produtosRef = collection(db, "produtos");
+    const q = query(produtosRef);
+    const querySnapshot = await getDocs(q);
+
+    const produtos = querySnapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        descricao: doc.data().descricao,
+        nome: doc.data().nome,
+        preco: doc.data().preco,
+        quantidade: doc.data().quantidade,
+      }))
+      .filter(produto => {
+        const produtoNome = produto.nome.toLowerCase();
+        const produtoDesc = produto.descricao.toLowerCase();
+
+        const nomeMatch = produtoNome.includes(nomeNormalizado) ||
+                          removerAcentos(produtoNome).includes(removerAcentos(nomeNormalizado));
+
+        const descMatch = produtoDesc.includes(descNormalizado) ||
+                          removerAcentos(produtoDesc).includes(removerAcentos(descNormalizado));
+
+        return nomeMatch && descMatch;
+      });
+
+    return {
+      status: produtos.length > 0 ? 200 : 404,
+      data: produtos,
+      mensagem: produtos.length > 0 ? "Produtos encontrados" : "Nenhum produto encontrado",
+    };
+  } catch (error) {
+    console.error("Erro ao buscar produto por nome e descrição:", error);
+    return { status: 500, mensagem: "Erro ao buscar produto" };
   }
+}
+
   
  
   function removerAcentos(texto: string) {
